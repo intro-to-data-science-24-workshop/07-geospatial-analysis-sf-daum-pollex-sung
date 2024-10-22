@@ -1,0 +1,91 @@
+---
+title: "Geospatial Analysis with SF"
+subtitle: "Session 9: Visualization"
+author: "Nadine Daum, Oliver Pollex, Yun-Te Sung"
+institute: "Hertie School" #"`r format(Sys.time(), '%d %B %Y')`"
+output:
+  xaringan::moon_reader:
+    includes:
+      after_body: "../add_hertie_logo.html"
+      in_header: "../my_header.html"
+    css: [default,'../simons-touch.css', metropolis, metropolis-fonts] 
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+      hash: true
+---
+
+
+```{css, echo=FALSE} 
+@media print { # print out incremental slides; see https://stackoverflow.com/questions/56373198/get-xaringan-incremental-animations-to-print-to-pdf/56374619#56374619
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+
+```{r setup, include=FALSE}
+# figures formatting setup
+options(htmltools.dir.version = FALSE)
+library(knitr)
+opts_chunk$set(
+  comment = "  ",
+  prompt = T,
+  fig.align="center", #fig.width=6, fig.height=4.5, 
+  # out.width="748px", #out.length="520.75px",
+  dpi=300, #fig.path='Figs/',
+  cache=F, #echo=F, warning=F, message=F
+  engine.opts = list(bash = "-l")
+  )
+
+## Next hook based on this SO answer: https://stackoverflow.com/a/39025054
+knit_hooks$set(
+  prompt = function(before, options, envir) {
+    options(
+      prompt = if (options$engine %in% c('sh','bash')) '$ ' else 'R> ',
+      continue = if (options$engine %in% c('sh','bash')) '$ ' else '+ '
+      )
+})
+
+library(tidyverse)
+library(nycflights13)
+library(kableExtra)
+```
+
+
+# Table of contents
+
+<br>
+
+1. [Why SF]
+
+2. [Basic Features](#method)
+
+3. [Application]
+
+
+<!-- ############################################ -->
+---
+class: inverse, center, middle
+name: whyviz
+
+
+
+
+---
+# End slide
+
+
+
+
+
+
+
+
+
+
+
+
