@@ -2,7 +2,7 @@
 title: "Geospatial Analysis with SF"
 subtitle: "Mapping Berlin's Christmas Markets"
 author: "Nadine Daum, Oliver Pollex, Yun-Te Sung"
-institute: "Hertie School" #"`r format(Sys.time(), '%d %B %Y')`"
+institute: "Hertie School, Master of Data Science for Public Policy" #"`r format(Sys.time(), '%d %B %Y')`"
 output:
   xaringan::moon_reader:
     includes:
@@ -51,8 +51,13 @@ knit_hooks$set(
 })
 
 library(tidyverse)
-library(nycflights13)
 library(kableExtra)
+library(here)
+```
+
+
+```{r}
+
 ```
 
 
@@ -86,7 +91,14 @@ name: intro
 ### Scenario
 You want to go to Christmas Markets.
 
-Which ones are closest to Hertie? If you want to visit as many as possible in a day where should you go? 
+---
+# Hook
+
+### Scenario
+You want to go to Christmas Markets.
+
+<b>Question:</b> Which ones are closest to Hertie? If you want to visit as many as possible in a day where should you go? 
+
 
 ---
 # Hook
@@ -94,16 +106,55 @@ Which ones are closest to Hertie? If you want to visit as many as possible in a 
 ### Scenario
 You want to go to Christmas Markets.
 
-Which ones are closest to Hertie? If you want to visit as many as possible in a day where should you go? 
+<b>Question:</b> Which ones are closest to Hertie? If you want to visit as many as possible in a day where should you go? 
 
 .pull-left[
-&lt;div align="center"&gt;
-&lt;br&gt;
-&lt;img src="images/cm_list" width=400&gt;
-&lt;/div&gt;
+<br>
+<div align="center">
+<img src="images/cm_list.png" width=400>
+</div>
 ]
 
 
+---
+# Hook
+
+### Scenario
+You want to go to Christmas Markets.
+
+<b>Question:</b> Which ones are closest to Hertie? If you want to visit as many as possible in a day where should you go? 
+
+.pull-left[
+<br>
+<div align="center">
+<img src="images/cm_list.png" width=400>
+</div>
+]
+
+.pull-right[
+<br>
+<div align="center">
+<img src="images/Christmas markets.png" width=400>
+</div>
+]
+---
+# Geospatial Analysis
+
+Geospatial analysis can help us answer public policy questions such as
+- Zoning
+- Traffic accidents
+- Climate change
+- Pandemic
+
+<div alight = "center", style="display: flex; align-items: center; justify-content: center;">
+<img src="images/zoning.png" width=350>
+<img src="images/dengue.png" width=250>
+<img src="images/climate.jpeg" width=350>
+</div>
+
+.footnote[<sub>Images taken from (from left to right):
+[WZB Data Science Blog](https://gis-iq.esri.de/klimawandel-im-unterricht-das-stadtklima-in-berlin/), [Spatial Analysis and Health (Delmelle & Kanaroglou, 2015)](https://pages.charlotte.edu/eric-delmelle/wp-content/uploads/sites/150/2012/12/IntroductionSpatialAnalysisAndHealthDelmelleKanaroglou.pdf), [GIS IQ Blog](https://gis-iq.esri.de/klimawandel-im-unterricht-das-stadtklima-in-berlin/)
+]
 
 ---
 
@@ -116,9 +167,20 @@ name: method
 
 ---
 
+# Simple Features (sf) Package
 
+.pull-left[
+The simple features package has a pocket of functions to help us <b>create maps, translate data into coordinates, and operate on the maps</b> we’ve created. 
 
+It also <b>integrates with tidyverse</b>, meaning we can easily use dplyr and ggplot to manipulate and visualise data. 
+]
 
+.pull-right[
+<br>
+<div align="center">
+<img src="images/sf.png" width=350>
+</div>
+]
 
 ---
 class: inverse, center, middle
@@ -206,11 +268,64 @@ christmas_markets %>%
 ```
 
 
+---
+# Mapping Berlin's Christmas Markets
+
+###Step 2: Finding the coordinates of the objects
+.pull-left[
+```{r mpg-layers-3, tidy=FALSE, message=FALSE, fig.show="hide",fig.align='right',fig.dim=c(4.8,5), out.width="100%"}
+ggplot() +
+  geom_sf(data=christmas_markets) + #<<
+  theme_minimal()
+```
+]
+.pull-right[
+![](`r knitr::fig_chunk("mpg-layers-3", "png")`)
+]
+
+---
+# Mapping Berlin's Christmas Markets
+
+###Data Cleaning
+```{r}
+# Making sure the coordinates reference systems are the same (referring to the same map)
+st_crs(christmas_markets) <- st_crs(berlin_districts) #<<
+
+# Filter markets to keep only those within the Berlin districts
+christmas_markets_berlin <- st_intersection(christmas_markets, berlin_districts) #<<
+```
+
+---
+# Mapping Berlin's Christmas Markets
+
+###Step 3: Plotting the Christmas Markets onto Berlin's map
+.pull-left[
+```{r mpg-layers-4, tidy=FALSE, message=FALSE, fig.show="hide",fig.align='right', out.width="100%"}
+ggplot() +
+  geom_sf(data = berlin_districts) + 
+  geom_sf(data = christmas_markets_berlin) +
+  theme_minimal()
+```
+]
+
+
+.pull-right[
+![](`r knitr::fig_chunk("mpg-layers-4", "png")`)
+]
+---
+# Mapping Berlin's Christmas Markets
+
+###Step 4: Styling the map
+
+<br>
+<div align="center">
+<img src="images/density.png" width=600>
+</div>
 
 ---
 # Further Resources
 
-###For an overview and deep dive into the backend of the packages: 
+###For an overview and deep dive into the backend of the packages 
 - [sf Vignettes](https://r-spatial.github.io/sf/articles/)
 - [Chapter 2 Geographic data in R of Geocomputation with R by Robin Lovelace, Jakub Nowosad and Jannes Muenchow](https://r.geocompx.org/spatial-class.html#sf-classes)
 
