@@ -20,9 +20,10 @@ div.comment {background-color:#F0F6FF; border-radius: 5px; padding: 20px;}
 
 
 **Instructions for this tutorial:** 
-This tutorial will (1.) provide the code for creating the Christmas market map as you saw in the presentation and (2.) lead you step-by-step - using the sf-package - to answer the question, in which Berlin district, most people have to "share" a Christmas market and where they should go instead.
-Part 1 you can read trough to understand the sf-package. In part 2 you will be asked to perform tasks using the sf-package.
-In each code chunk all sf-functions are explained to optimize comprehensibility of the package.
+This tutorial will (1.) provide the code for creating the Christmas market map as you saw in the presentation and (2.) lead you step-by-step - using the sf-package - to answer the question, in which Berlin district, most people have to "share" a Christmas market and where they should go instead. It will also show you the **closest Christmas markets from Hertie School**.
+
+At the **end of the document, you will be asked to perform 3 tasks** to adapt the code. That will give you the opportunity to show what you have learned.
+In each code chunk all **sf-functions are explained** to optimize comprehensibility of the package.
 In this tutorial, we only cover sf-functions that are necessary to create the Berlin Christmas market map. 
 
 If you want to learn more about the package we recommend you the following material: 
@@ -241,7 +242,7 @@ If you were the major of Berlin, you might ask yourself where to open a new, shi
 
 What is your intuition? Which district has fewest markets in relation to population size?
 
-Let's find out with the help of the sf package.
+Let's find out with the help of the sf package. At the bottom of the code, there are 3 tasks for you to 
 
 <br>
 
@@ -483,5 +484,18 @@ ggplot(data = berlin_districts) +
 ```
 
 <br>
+
+Our map shows that the christmas market density per 1000 residents is lowest in Lichtenberg (where there are 0 markets, if we believe the data we found) and Neukölln. Additionally, we can see that both districts have no neighboring districts with a very high density. So as mayor of Berlin we might decide to open our new market in either Neukölln or Lichtenberg. 
+Would you take the same decision?
+
+<br>
+
+**To learn how to use the sf-package here are three tasks:**
+
+1. The mayor does not really like the green color gradient of your map. Change it to blue.
+
+2. The mayor decides that students from Hertie can walk further than just to the 5 markets colored in gold. Mark the 10 closest markets to Hertie in gold.
+
+3. A friend of yours went to a market in Brandenburg and was amazed by how beautiful Berlin's surroundings are. Now you also want to join and decide to include Brandenburg's Christmas markets from the data set on your map. Don't worry that they will be free floating on the map.
 
 ***
