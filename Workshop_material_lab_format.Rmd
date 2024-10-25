@@ -1,17 +1,15 @@
 ---
 title: "Workshop_sf-geospatial_analysis"
-subtitle: "Working with spacial data"
+subtitle: "Working with spatial data"
 author: "Nadine Daum, Oliver Pollex, Yun-Te Sung"
 date: "(Fall 2024) Introduction to Data Science"
 output: 
-    rmdformats::robobook:
-    toc: TRUE
+  rmdformats::robobook:
+    toc_depth: 3
     df_print: paged
     number_sections: FALSE
     highlight: tango
-    toc_depth: 3
-    toc_float: true
-    self_contained: false
+lf_contained: false
 ---
 
 ```{=html}
@@ -54,44 +52,23 @@ background-color: #2f1a61;
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-***
+**Instructions for this tutorial:**
 
-**Instructions for this tutorial:** 
-This tutorial will (1.) provide the code for creating the Christmas market map as you saw in the presentation and (2.) lead you step-by-step - using the sf-package - to answer the question, in which Berlin district, most people have to "share" a Christmas market and where they should go instead. It will also show you the **closest Christmas markets from Hertie School**.
+This tutorial will (1.) provide the code for creating the Christmas market map as you saw in the presentation and (2.) lead you step-by-step - using the sf-package - to answer the question, in which Berlin district there are the fewest markets relative to the population size and therefore people have to "share" Christmas markets. The resulting map will also show you the **closest Christmas markets from Hertie School**.
 
 At the **end of the document, you will be asked to perform 3 tasks** to adapt the code. That will give you the opportunity to show what you have learned.
 In each code chunk all **sf-functions are explained** to optimize comprehensibility of the package.
 In this tutorial, we only cover sf-functions that are necessary to create the Berlin Christmas market map. 
 
----
+***
 
-# Additional resources: `r emo::ji('woman_technologist')`
-
-If you want to learn more about the package we recommend you the following material: 
-
-- For an overview and deep dive into the backend of the packages
-
-    https://r-spatial.github.io/sf/articles/
-    https://r.geocompx.org/spatial-class.html#sf-classes
-
-- Cheat sheet of functions
-
-    https://github.com/rstudio/cheatsheets/blob/main/sf.pdf
-
-- Case studies with step by step walkthroughs
-
-    https://www.robwiederstein.org/2022/03/28/simple-features-tutorial-in-r-number-2/
-    https://www.jessesadler.com/post/gis-with-r-intro/
-
----
-
-# About the sf-package: `r emo::ji('speech_balloon')`
+# About the sf-package: 
 
 The sf-package in R stands for **"simple features"** and is a powerful tool for handling **geo-spatial data**. It provides a standardized way to store and manipulate geographic vector data, integrating smoothly with the tidyverse suite of packages. With sf, you can easily **read, write, and analyze spatial data formats like shapefiles and GeoJSON**, which is **invaluable for creating maps and conducting spatial analyses**.
 
----
+***
 
-# Loading packages `r emo::ji('deciduous_tree')`
+# Loading packages:
 
 ```{r, include = T}
 # LOAD THE PACKAGES YOU WILL BE USING
@@ -102,7 +79,7 @@ library(stringr)
 library(rvest)
 ```
 
----
+***
 
 # 1. Creating the Berlin Christmas Market map
 ## a) Loading and Cleaning Berlin Districts Data
@@ -112,6 +89,7 @@ library(rvest)
 Explanation of sf-Package Functions:
 
 **st_read()**: Reads spatial data from a file and returns it as an sf object, which contains both attribute data and geometry.
+
 **geom_sf()**: A ggplot2 function that adds a layer to the plot for handling sf objects, allowing for the visualization of spatial geometries.
 
 ```{r}
@@ -139,7 +117,7 @@ ggplot() +
 
 ```
 
----
+***
 
 ## b) Loading and Visualizing Christmas Markets Data
 
@@ -161,7 +139,7 @@ ggplot() +
 
 ```
 
----
+***
 
 ##  c) Aligning Coordinate Reference Systems and Plotting Christmas Markets
 
@@ -205,7 +183,7 @@ ggplot() +
 
 ```
 
----
+***
 
 ## d) Finalizing and Styling the Map Visualization
 
@@ -267,7 +245,7 @@ ggplot(data = berlin_districts) +
  
 ```
 
----
+***
 
 #  2. Enriching the Berlin Christmas market map with population density and proximity to Hertie School.
 
@@ -277,7 +255,7 @@ What is your intuition? Which district has fewest markets in relation to populat
 
 Let's find out with the help of the sf-package. At the bottom of the code, there are 3 tasks for you to complete, which will give you the opportunity to apply what you have learned.
 
----
+***
 
 ## a) Scraping Population Data and Joining with Spatial Data
 
@@ -335,7 +313,7 @@ markets_per_district <- st_join(
 
 ```
 
----
+***
 ## b) Merging Data and Calculating Market Density
 
 *In this code chunk, we merge the Christmas markets data with the population data to calculate the market density (number of markets per 1,000 residents) for each district. We then join this enriched data back to the spatial data of Berlin districts to prepare for visualization.*
@@ -363,7 +341,7 @@ berlin_districts <- berlin_districts %>%
 
 ```
 
----
+***
 
 ## c) Calculating Distances to the Hertie School
 
@@ -415,7 +393,7 @@ closest_markets <- christmas_markets_berlin[which(christmas_markets_berlin$id %i
 
 ```
 
----
+***
 
 ## d) Plotting Berlin Districts with Market Density and Proximity to Hertie School
 
@@ -515,14 +493,14 @@ ggplot(data = berlin_districts) +
 
 ```
 
----
+***
 
 ## Interpretation of the results.
 
-Our map shows that the Christmas market density per 1000 residents is lowest in Lichtenberg (where there are 0 markets, if we believe the data we found) and Neukölln. Additionally, we can see that both districts have no neighboring districts with a very high density. So as mayor of Berlin we might decide to open our new market in either Neukölln or Lichtenberg. 
+Our map shows that the Christmas market density per 1000 residents is lowest in Lichtenberg (where there are 0 markets in our data set) and Neukölln. Additionally, we can see that both districts have no neighboring districts with a very high density. Consequently, as mayor of Berlin we might decide to open our new market in either Neukölln or Lichtenberg. 
 Would you take the same decision?
 
----
+***
 
 # To learn how to use the sf-package here are three tasks:
 
@@ -532,5 +510,28 @@ Would you take the same decision?
 
 3. A friend of yours went to a market in Brandenburg and was amazed by how beautiful Berlin's surroundings are. Now you also want to join and decide to include Brandenburg's Christmas markets from the data set on your map. Don't worry that they will be free floating on the map.
 
----
+
+If you have solved these tasks: Great job! We are sure that you will now want to create your own maps with sf.
+
+***
+
+# Additional resources: 
+
+If you want to learn more about the package we recommend you the following material: 
+
+- For an overview and deep dive into the backend of the packages
+
+    https://r-spatial.github.io/sf/articles/
+    https://r.geocompx.org/spatial-class.html#sf-classes
+
+- Cheat sheet of functions
+
+    https://github.com/rstudio/cheatsheets/blob/main/sf.pdf
+
+- Case studies with step by step walkthroughs
+
+    https://www.robwiederstein.org/2022/03/28/simple-features-tutorial-in-r-number-2/
+    https://www.jessesadler.com/post/gis-with-r-intro/
+
+***
 
