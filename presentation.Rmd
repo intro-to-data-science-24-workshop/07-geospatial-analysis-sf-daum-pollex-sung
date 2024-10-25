@@ -131,21 +131,22 @@ You want to go to Christmas Markets.
 
 .pull-right[
 <div align="center">
-<img src="images/Christmas markets.png" width=400>
+<img src="images/Christmas markets.png" width=600>
 </div>
 ]
 ---
 # Geospatial Analysis
+Geospatial analysis provides insights by visualizing and examining how geographic spaces influence behaviors, events, or patterns.
 
-Geospatial analysis can help us answer public policy questions such as
-- Zoning
-- Traffic accidents
-- Climate change
-- Pandemic
+It can help us address public policy questions such as how to
+- Better urban planning
+- Locate junctions of high traffic accidents
+- Identify patterns & impact of climate change
+- Understand the spread of diseases
 
 <div align = "center", style="display: flex; align-items: center; justify-content: center;">
 <img src="images/zoning.png" width=350>
-<img src="images/dengue.png" width=250>
+<img src="images/dengue.png" width=210>
 <img src="images/climate.jpeg" width=350>
 </div>
 
@@ -167,7 +168,11 @@ name: method
 # Simple Features (sf) Package
 
 .pull-left[
-The simple features package has a pocket of functions to help us <b>create maps, translate data into coordinates, and operate on the maps</b> we’ve created. 
+The simple features package <b>translates geospatial data from text form into a spatial format</b>. 
+
+It has a pocket of functions to help us <b>create maps, translate data into coordinates, and operate on the maps</b> we’ve created. 
+
+The functions help us create and manipulate shapes, perform calculations and visualise geospatial data. 
 
 It also <b>integrates with tidyverse</b>, meaning we can easily use dplyr and ggplot to manipulate and visualise data. 
 ]
@@ -193,15 +198,15 @@ name: casestudy
 # Mapping Berlin's Christmas Markets
 
 ###sf Package in essence
-To represent the geographic placement of an object you need two pieces of information: the coordinates of the object and a system of reference for how the coordinates relate to a physical location on Earth.<sup>1</sup>
+To represent the geographic placement of an object you need two pieces of information: the coordinates of the objects of interest and a system of reference for how the coordinates relate to a physical location on Earth.<sup>1</sup>
 
 .footnote[<sup>1</sup>This explanation is borrowed from [Jesse Sadler](https://www.jessesadler.com/post/gis-with-r-intro/)]
 
 
 ###Steps Breakdown
-1. Set up the system of reference (the map of Berlin)
+1. Set up the system of reference (Earth - longitude & latitude, Berlin)
 2. Obtain the coordinates of the objects of interest (Christmas Markets)
-3. Plot the objects onto the system of reference
+3. Plot the objects in the system of reference
 
 ---
 # Mapping Berlin's Christmas Markets
@@ -256,7 +261,7 @@ pre code {
 
 ```{r, echo = TRUE}
 christmas_markets_url <- "https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q="
-christmas_markets <- st_read(christmas_markets_url)
+christmas_markets <- st_read(christmas_markets_url) #<<
 ```
 
 ---
@@ -304,8 +309,8 @@ christmas_markets_berlin <- st_intersection(christmas_markets, berlin_districts)
 .pull-left[
 ```{r mpg-layers-4, tidy=FALSE, message=FALSE, fig.show="hide",fig.align='right', out.width="100%"}
 ggplot() +
-  geom_sf(data = berlin_districts) + 
-  geom_sf(data = christmas_markets_berlin) +
+  geom_sf(data = berlin_districts) +  #<<
+  geom_sf(data = christmas_markets_berlin) + #<<
   theme_minimal()
 ```
 ]
@@ -323,6 +328,23 @@ Filling in color to match the Christmas theme.
 <div align="center">
 <img src="images/Christmas markets.png" width=600>
 </div>
+
+---
+# Recap
+
+###Step 1: Creating the system of reference
+- <b>st_read()</b> (Berlin's map)
+
+###Step 2: Finding the coordinates of the objects of interests
+- <b>st_read()</b> (Christmas markets)
+
+###Step 3: Plotting the objects of interest in the system of reference
+- <b>st_crs()</b> (aligning Berlin's map and Christmas markets coordinates)
+- <b>st_intersection()</b> (filter data)
+- <b>geom_sf()</b> (plotting)
+
+###Geospatial data analysis
+Geospatial analysis can inform our decision making in many public policy areas such as urban planning, environmental studies, disaster management and more as they relate to geographical data. The simple features package is a powerful tool to help us achieve our purpose. 
 
 ---
 # Further Resources
