@@ -2,7 +2,7 @@
 title: "Geospatial Analysis with SF"
 subtitle: "Mapping Berlin's Christmas Markets"
 author: "Nadine Daum, Oliver Pollex, Yun-Te Sung"
-institute: "Hertie School, Master of Data Science for Public Policy" #"`r format(Sys.time(), '%d %B %Y')`"
+institute: "Intro to Data Science, Fall 2024" #"`r format(Sys.time(), '%d %B %Y')`"
 output:
   xaringan::moon_reader:
     includes:
@@ -109,7 +109,6 @@ You want to go to Christmas Markets.
 <b>Question:</b> Which ones are closest to Hertie? If you want to visit as many as possible in a day where should you go? 
 
 .pull-left[
-<br>
 <div align="center">
 <img src="images/cm_list.png" width=400>
 </div>
@@ -125,14 +124,12 @@ You want to go to Christmas Markets.
 <b>Question:</b> Which ones are closest to Hertie? If you want to visit as many as possible in a day where should you go? 
 
 .pull-left[
-<br>
 <div align="center">
 <img src="images/cm_list.png" width=400>
 </div>
 ]
 
 .pull-right[
-<br>
 <div align="center">
 <img src="images/Christmas markets.png" width=400>
 </div>
@@ -146,7 +143,7 @@ Geospatial analysis can help us answer public policy questions such as
 - Climate change
 - Pandemic
 
-<div alight = "center", style="display: flex; align-items: center; justify-content: center;">
+<div align = "center", style="display: flex; align-items: center; justify-content: center;">
 <img src="images/zoning.png" width=350>
 <img src="images/dengue.png" width=250>
 <img src="images/climate.jpeg" width=350>
@@ -209,23 +206,19 @@ To represent the geographic placement of an object you need two pieces of inform
 ---
 # Mapping Berlin's Christmas Markets
 
-.pull-left[
 ### Step 1: Set up the system of reference
 ```{r mpg-layers-1, tidy=FALSE, message=FALSE, fig.show="hide", fig.dim=c(4.8, 5), out.width="100%"}
 library(sf)
 
-districts_file <-"/Users/yunteee/Documents/GitHub/07-geospatial-analysis-sf-daum-pollex-sung/data/bezirksgrenzen.geojson"
+districts_file <-"data/bezirksgrenzen.geojson"
 berlin_districts <- st_read(districts_file) #<<
 
 ```
-]
 
 
 ---
 # Mapping Berlin's Christmas Markets
 
-
-.pull-left[
 ###Step 1: Set up the system of reference
 ```{r}
 berlin_districts %>%
@@ -253,7 +246,15 @@ ggplot()+
 # Mapping Berlin's Christmas Markets
 
 ###Step 2: Finding the coordinates of the objects
-```{r}
+
+<style>
+pre code {
+  white-space: pre-wrap;    
+  word-wrap: break-word;   
+}
+</style>
+
+```{r, echo = TRUE}
 christmas_markets_url <- "https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q="
 christmas_markets <- st_read(christmas_markets_url)
 ```
@@ -286,7 +287,8 @@ ggplot() +
 ---
 # Mapping Berlin's Christmas Markets
 
-###Data Cleaning
+###Step 3: Plotting the Christmas Markets onto Berlin's map
+####Aligning coordinate systems and filtering for Berlin data
 ```{r}
 # Making sure the coordinates reference systems are the same (referring to the same map)
 st_crs(christmas_markets) <- st_crs(berlin_districts) #<<
@@ -316,10 +318,10 @@ ggplot() +
 # Mapping Berlin's Christmas Markets
 
 ###Step 4: Styling the map
+Filling in color to match the Christmas theme. 
 
-<br>
 <div align="center">
-<img src="images/density.png" width=600>
+<img src="images/Christmas markets.png" width=600>
 </div>
 
 ---

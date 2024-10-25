@@ -24,7 +24,7 @@ class: center, middle, inverse, title-slide
 ### Nadine Daum, Oliver Pollex, Yun-Te Sung
 ]
 .institute[
-### Hertie School, Master of Data Science for Public Policy
+### Intro to Data Science, Fall 2024
 ]
 
 ---
@@ -93,7 +93,6 @@ You want to go to Christmas Markets.
 &lt;b&gt;Question:&lt;/b&gt; Which ones are closest to Hertie? If you want to visit as many as possible in a day where should you go? 
 
 .pull-left[
-&lt;br&gt;
 &lt;div align="center"&gt;
 &lt;img src="images/cm_list.png" width=400&gt;
 &lt;/div&gt;
@@ -109,14 +108,12 @@ You want to go to Christmas Markets.
 &lt;b&gt;Question:&lt;/b&gt; Which ones are closest to Hertie? If you want to visit as many as possible in a day where should you go? 
 
 .pull-left[
-&lt;br&gt;
 &lt;div align="center"&gt;
 &lt;img src="images/cm_list.png" width=400&gt;
 &lt;/div&gt;
 ]
 
 .pull-right[
-&lt;br&gt;
 &lt;div align="center"&gt;
 &lt;img src="images/Christmas markets.png" width=400&gt;
 &lt;/div&gt;
@@ -130,7 +127,7 @@ Geospatial analysis can help us answer public policy questions such as
 - Climate change
 - Pandemic
 
-&lt;div alight = "center", style="display: flex; align-items: center; justify-content: center;"&gt;
+&lt;div align = "center", style="display: flex; align-items: center; justify-content: center;"&gt;
 &lt;img src="images/zoning.png" width=350&gt;
 &lt;img src="images/dengue.png" width=250&gt;
 &lt;img src="images/climate.jpeg" width=350&gt;
@@ -193,13 +190,12 @@ To represent the geographic placement of an object you need two pieces of inform
 ---
 # Mapping Berlin's Christmas Markets
 
-.pull-left[
 ### Step 1: Set up the system of reference
 
 ``` r
 R&gt; library(sf)
 R&gt; 
-R&gt; districts_file &lt;-"/Users/yunteee/Documents/GitHub/07-geospatial-analysis-sf-daum-pollex-sung/data/bezirksgrenzen.geojson"
+R&gt; districts_file &lt;-"data/bezirksgrenzen.geojson"
 *R&gt; berlin_districts &lt;- st_read(districts_file)
 ```
 
@@ -213,14 +209,11 @@ R&gt; districts_file &lt;-"/Users/yunteee/Documents/GitHub/07-geospatial-analysi
    Bounding box:  xmin: 13.08835 ymin: 52.33825 xmax: 13.76116 ymax: 52.67551
    Geodetic CRS:  WGS 84
 ```
-]
 
 
 ---
 # Mapping Berlin's Christmas Markets
 
-
-.pull-left[
 ###Step 1: Set up the system of reference
 
 ``` r
@@ -269,6 +262,14 @@ R&gt; ggplot()+
 # Mapping Berlin's Christmas Markets
 
 ###Step 2: Finding the coordinates of the objects
+
+&lt;style&gt;
+pre code {
+  white-space: pre-wrap;    
+  word-wrap: break-word;   
+}
+&lt;/style&gt;
+
 
 ``` r
 R&gt; christmas_markets_url &lt;- "https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q="
@@ -336,7 +337,8 @@ R&gt; ggplot() +
 ---
 # Mapping Berlin's Christmas Markets
 
-###Data Cleaning
+###Step 3: Plotting the Christmas Markets onto Berlin's map
+####Aligning coordinate systems and filtering for Berlin data
 
 ``` r
 R&gt; # Making sure the coordinates reference systems are the same (referring to the same map)
@@ -373,10 +375,10 @@ R&gt; ggplot() +
 # Mapping Berlin's Christmas Markets
 
 ###Step 4: Styling the map
+Filling in color to match the Christmas theme. 
 
-&lt;br&gt;
 &lt;div align="center"&gt;
-&lt;img src="images/density.png" width=600&gt;
+&lt;img src="images/Christmas markets.png" width=600&gt;
 &lt;/div&gt;
 
 ---
