@@ -19,6 +19,34 @@ div.comment {background-color:#F0F6FF; border-radius: 5px; padding: 20px;}
 </style>
 
 
+**Instructions for this tutorial:** 
+This tutorial will (1.) provide the code for creating the Christmas market map as you saw in the presentation and (2.) lead you step-by-step - using the sf-package - to answer the question, in which Berlin district, most people have to "share" a Christmas market and where they should go instead.
+Part 1 you can read trough to understand the sf-package. In part 2 you will be asked to perform tasks using the sf-package.
+In each code chunk all sf-functions are explained to optimize comprehensibility of the package.
+In this tutorial, we only cover sf-functions that are necessary to create the Berlin Christmas market map. 
+
+If you want to learn more about the package we recommend you the following material: 
+
+- For an overview and deep dive into the backend of the packages
+
+    https://r-spatial.github.io/sf/articles/
+    https://r.geocompx.org/spatial-class.html#sf-classes
+
+- Cheat sheet of functions
+
+    https://github.com/rstudio/cheatsheets/blob/main/sf.pdf
+
+- Case studies with step by step walkthroughs
+
+    https://www.robwiederstein.org/2022/03/28/simple-features-tutorial-in-r-number-2/
+    https://www.jessesadler.com/post/gis-with-r-intro/
+
+<br>
+
+**About the sf package:** 
+The sf package in R stands for **"simple features"** and is a powerful tool for handling **geo-spatial data**. It provides a standardized way to store and manipulate geographic vector data, integrating smoothly with the tidyverse suite of packages. With sf, you can easily **read, write, and analyze spatial data formats like shapefiles and GeoJSON**, which is **invaluable for creating maps and conducting spatial analyses**.
+
+
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
                       eval = TRUE,
@@ -30,12 +58,10 @@ knitr::opts_chunk$set(echo = TRUE,
 "#f3f0ff"
 ```
 
-<!-- Do not forget to input your Github username in the YAML configuration up there --> 
-
 ***
 
 ```{r, include = T}
-# LOAD THE PACKAGES YOU ARE USING IN THIS CODE CHUNK
+# LOAD THE PACKAGES YOU WILL BE USING
 library(sf)
 library(dplyr)
 library(ggplot2)
@@ -47,197 +73,415 @@ library(rvest)
 
 ***
 
-## Task build a map of christmas markets in berlin
+## 1. Creating the Berlin Christmas Market map
 
+a) **Loading and Cleaning Berlin Districts Data**
 
-a) Load nessecary data. **Use this code for your calculation:**
+*In this code chunk, we load the Berlin districts GeoJSON file, clean and standardize the district names, and visualize the districts using ggplot2 and sf.*
 
-districts_file <- "bezirksgrenzen.geojson"  # Berlin districts GeoJSON path
-christmas_markets_url <- "https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q="  # URL to the Christmas markets GeoJSON
-population_url <- "https://de.wikipedia.org/wiki/Bevölkerung_von_Berlin"  # Wikipedia page with population data
+Explanation of sf Package Functions:
 
-### Function to clean and standardize district names
+**st_read()**: Reads spatial data from a file and returns it as an sf object, which contains both attribute data and geometry.
+**geom_sf()**: A ggplot2 function that adds a layer to the plot for handling sf objects, allowing for the visualization of spatial geometries.
+
+```{r}
+
+# File path to the Berlin districts GeoJSON file
+districts_file <- "data/bezirksgrenzen.geojson"  # Berlin districts GeoJSON path
+
+# Function to clean and standardize district names
 clean_district_names <- function(name) {
   name %>%
-    str_replace_all("-", " ") %>%  # Replace dashes with spaces
-    str_replace_all("[^\\w\\säöüÄÖÜß]", "") %>%  # Remove any non-alphanumeric and non-German characters
-    str_squish() %>%  # Remove extra whitespace
-    str_to_title()  # Convert to title case
+    str_replace_all("-", " ") %>%               # Replace dashes with spaces
+    str_replace_all("[^\\w\\säöüÄÖÜß]", "") %>% # Remove any non-alphanumeric and non-German characters
+    str_squish() %>%                            # Remove extra whitespace
+    str_to_title()                              # Convert to title case
 }
 
-### Read Berlin districts GeoJSON file
-berlin_districts <- st_read(districts_file) %>%
-  mutate(Gemeinde_name = clean_district_names(Gemeinde_name))
+# Load the Berlin districts data and clean the district names
+berlin_districts <- st_read(districts_file, quiet = TRUE) %>%          # Read the GeoJSON file into an sf object
+  mutate(Gemeinde_name = clean_district_names(Gemeinde_name))  # Clean the district names using the custom function
 
-```{r}
-# YOUR CODE HERE
-
-```
-
-<br>
-
-b) Read the Christmas markets GeoJSON directly from the URL (christmas_markets_url) with the function st_read(URL) and store them in a variable called christmas_markets.
-*(For documentation on the function, type: ?st_read)*
-
-```{r}
-# YOUR CODE HERE
+# Plot the Berlin districts
+ggplot() +
+  geom_sf(data = berlin_districts) +   # Add the sf object as a layer to the plot
+  theme_minimal()                      # Apply a minimal theme to the plot
 
 ```
 
-<br>
+b) **Loading and Visualizing Christmas Markets Data**
 
-c) Ensure the coordinate systems are the same (**Use this code for your calculation:** st_crs(christmas_markets) <- st_crs(berlin_districts))
-*(For documentation on the function, type: ?st_crs)*
+*In this code chunk, we load the Christmas markets data from an online GeoJSON source, read it into an sf object, and visualize the market locations using ggplot2. This demonstrates how to work with spatial data using the sf package and how to plot it using ggplot2.*
+
 
 ```{r}
-# YOUR CODE HERE
+
+# URL of the GeoJSON file containing Christmas markets data
+christmas_markets_url <- "https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q="
+
+# Read the GeoJSON data into an sf object
+christmas_markets <- st_read(christmas_markets_url, quiet = TRUE)
+# st_read(): Reads spatial data files into sf objects, supporting various formats like GeoJSON, Shapefiles, etc.
+
+# Plot the Christmas markets using ggplot2
+ggplot() +
+  geom_sf(data = christmas_markets) +  # geom_sf(): Adds spatial data from an sf object to the ggplot
+  theme_minimal()                      # Apply a minimal theme to the plot
 
 ```
 
-<br>
+c) **Aligning Coordinate Reference Systems and Plotting Christmas Markets**
 
-d) We only want to include Christmas markets within Berlin in our map. Therefore check which christmas_markets are in the berlin_districts. Use the function st_intersection(x, y, ...) to keep intersecting Christmas markets and store them in the variable christmas_markets_berlin.
-*(For documentation on the function, type: ?st_intersection)*
+*In this code chunk, we align the Coordinate Reference Systems (CRS) of the Christmas markets and Berlin districts data to ensure they match. We then find the intersection of the two datasets to obtain only the Christmas markets within Berlin, calculate the centroids of the districts for labeling, and finally plot the Berlin districts and Christmas markets on a map.*
+
+Explanation of sf Package Functions:
+
+**st_crs()**: Retrieves or sets the Coordinate Reference System of an sf object. Aligning CRS is crucial for spatial operations to ensure that layers align correctly on a map.
+
+**st_intersection()**: Computes the geometric intersection of two sf objects, returning the overlapping spatial features. This function is used to find common areas or features between datasets.
+
+**st_centroid()**: Calculates the centroid (geometric center point) of spatial features within an sf object. Centroids are useful for labeling or summarizing spatial areas.
+
 
 ```{r}
-# YOUR CODE HERE
 
-```
+# Set the CRS of the Christmas markets to match that of the Berlin districts
+st_crs(christmas_markets) <- st_crs(berlin_districts)
+# st_crs(): Gets or sets the Coordinate Reference System of an sf object
+# Here, we assign the CRS of 'berlin_districts' to 'christmas_markets' to ensure they are the same
 
-<br>
+# Find the intersection of Christmas markets and Berlin districts to get markets within Berlin
+christmas_markets_berlin <- st_intersection(christmas_markets, berlin_districts)
+# st_intersection(): Computes the geometric intersection of two sf objects
+# It returns spatial features that are common to both input datasets
 
-e) Let's calculate the centroids of the Berlin districts to position the names. (**Use this code for your calculation:** 
-berlin_districts_centroids <- st_centroid(berlin_districts) %>%
+# Calculate the centroids of each Berlin district for labeling purposes
+berlin_districts_centroids <- st_centroid(berlin_districts) %>%  # Compute the geometric centers
   mutate(
-    split_name = str_wrap(Gemeinde_name, width = 10))  # Wrap names into lines of 10 characters)
+    split_name = str_wrap(Gemeinde_name, width = 10)  # Wrap district names into lines of 10 characters
+  )
+# st_centroid(): Calculates the centroid (geometric center) of spatial features
+# The 'mutate()' function adds a new column 'split_name' for nicely formatted district names
+
+# Plot the Berlin districts and the Christmas markets within them
+ggplot() +
+  geom_sf(data = berlin_districts) +                # Plot the Berlin districts polygons
+  geom_sf(data = christmas_markets_berlin) +        # Add the Christmas markets points to the plot
+  theme_minimal()
+# geom_sf(): A ggplot2 function that adds a layer to the plot for sf objects
+# It automatically handles the geometry and projection of the spatial data
+
+```
+
+d) **Finalizing and Styling the Map Visualization**
+
+*In this code chunk, we create a detailed and styled map of Berlin showing the districts, Christmas markets, and district names. We customize the appearance of the map using various ggplot2 layers and functions, integrating spatial data handling from the sf package.*
+
+Explanation of sf Package functions:
+
+**st_coordinates()**: Extracts the numeric coordinates of geometries from an sf object. It returns a matrix of coordinates, which can be used for plotting or analysis.
 
 ```{r}
-# YOUR CODE HERE
+
+ggplot(data = berlin_districts) +
+  # Plot Berlin districts with specified fill and border color
+  geom_sf(fill = 'darkolivegreen', color = "white", size = 0.4, alpha = 0.8) +  # District borders in white
+  # geom_sf(): Plots spatial data from an sf object; here, it draws the polygons of the districts
+
+  # Plot each Christmas market as a red point
+  geom_sf(
+    data = christmas_markets_berlin,                    # Use the Christmas markets data within Berlin
+    aes(geometry = geometry),                           # Aesthetic mapping for geometry
+    color = "#D94854",                                  # Outline color of the points
+    size = 2,                                           # Size of the points
+    shape = 21,                                         # Shape code for points with fill and outline
+    fill = "#D94854"                                    # Fill color of the points
+  ) +
+  # geom_sf(): Plots spatial data from an sf object; here, it plots the Christmas market locations as points
+
+  # Add district names at centroids
+  geom_text(
+    data = berlin_districts_centroids,                  # Use the centroids of the districts for label placement
+    aes(
+      x = st_coordinates(geometry)[, 1],                # Extract x-coordinate of centroids
+      y = st_coordinates(geometry)[, 2],                # Extract y-coordinate of centroids
+      label = split_name                                # Text labels (district names) to display
+    ), 
+    size = 3,                                           # Text size
+    color = "white",                                    # Text color
+    fontface = "bold",                                  # Make text bold
+    lineheight = 0.8                                    # Adjust line height for wrapped text
+  ) + 
+  # st_coordinates(): Extracts coordinates from sf objects; used here to get x and y positions for labels
+  # geom_text(): Adds text labels to the plot at specified positions
+
+  # Add title and caption to the plot
+  labs(
+    title = "Berlin Christmas Markets",                 # Title of the map
+    caption = "Data Source: Open Data Berlin & Wikipedia"  # Caption with data sources
+  ) +
+  # labs(): Adds labels like title and caption to the plot
+
+  # Apply minimal theme and remove axis elements
+  theme_minimal() +
+  theme(
+    axis.title = element_blank(),                       # Remove axis titles
+    axis.text = element_blank(),                        # Remove axis text
+    axis.ticks = element_blank(),                       # Remove axis ticks
+    panel.grid = element_blank()                        # Remove background grid
+  ) 
+ 
+```
+
+<br>
+
+## 2. Enrichting the Berlin Christmas market map with population dencity and proximity to Hertie School.
+
+If you were the major of Berlin, you might ask yourself where to open a new, shiny Christmas market. Your intuition would be that a new Christmas market makes sense in a district, where there are fewest markets in relation to population size because you assume that markets are most crowded.
+
+What is your intuition? Which district has fewest markets in relation to population size?
+
+Let's find out with the help of the sf package.
+
+<br>
+
+a) **Scraping Population Data and Joining with Spatial Data**
+
+*We know already where the markets are located. We now need to count the markets in each district and find out how many people live in each district. In this code chunk, we scrape population data for Berlin districts from a Wikipedia page, clean and preprocess the data, and then perform a spatial join with the Christmas markets data to count the number of markets per district.*
+
+Explanation of sf Package functions:
+
+**st_join()**: Performs a spatial join between two sf objects, combining their attributes based on spatial relationships (e.g., intersections, containment).
+
+**st_intersects()**: A spatial predicate function used to determine if geometries intersect; used here to specify the type of spatial relationship for the join.
+
+**st_drop_geometry()**: Removes the geometry column from an sf object, returning a regular data frame without spatial attributes.
+
+<br>
+
+```{r}
+
+# URL of the Wikipedia page containing population data for Berlin districts
+population_url <- "https://de.wikipedia.org/wiki/Bevölkerung_von_Berlin"  # Wikipedia page with population data
+
+# Scrape population data from Wikipedia
+population_data <- read_html(population_url) %>%    # Read the HTML content of the Wikipedia page
+  html_node("table.wikitable") %>%                  # Select the first table with class 'wikitable'
+  html_table() %>%                                  # Convert the HTML table to a data frame
+  select(Bezirk = 1, Bevölkerung = 2) %>%           # Select columns: District (Bezirk) and Population (Bevölkerung)
+  mutate(
+    # Clean the district names
+    Bezirk = str_squish(Bezirk) %>%                 # Remove leading/trailing whitespace and reduce multiple spaces
+      str_replace_all("-", " ") %>%                 # Replace hyphens with spaces
+      str_replace_all("\\s+", " ") %>%              # Replace multiple spaces with a single space
+      str_to_title(),                               # Convert district names to title case
+    
+    # Remove duplicates within the district names
+    Bezirk = sapply(Bezirk, function(x) {           # Apply a function to each district name
+      words <- unlist(str_split(x, " "))            # Split the name into individual words
+      unique_words <- unique(words)                 # Remove duplicate words
+      paste(unique_words, collapse = " ")           # Reconstruct the name without duplicates
+    }),
+    
+    # Clean the population numbers
+    Bevölkerung = as.numeric(gsub("\\.", "", Bevölkerung))  # Remove dots (thousands separator) and convert to numeric
+  ) %>%
+  filter(!is.na(Bevölkerung))                       # Filter out any rows with missing population data
+
+# Join Christmas markets with district data and count the number of markets per district
+markets_per_district <- st_join(
+  christmas_markets_berlin,                         # Spatial data of Christmas markets within Berlin
+  berlin_districts,                                 # Spatial data of Berlin districts
+  join = st_intersects                              # Join where geometries intersect
+) %>%
+  st_drop_geometry() %>%                            # Remove geometry columns to simplify the data frame
+  group_by(Gemeinde_name.y) %>%                     # Group by the district name from the districts data
+  summarise(Christmas_Markets = n()) %>%            # Count the number of markets per district
+  mutate(Gemeinde_name.y = clean_district_names(Gemeinde_name.y))  # Clean the district names using a custom function
 
 ```
 
 <br>
 
-f) At this point, you have a dataset containing the locations of Christmas markets in Berlin (christmas_markets_berlin) and another dataset with the geographical boundaries and names of Berlin districts (berlin_districts). The goal here is to determine how many Christmas markets are located in each district of Berlin, and to provide a clean list of districts with the corresponding number of markets.
+b) **Merging Data and Calculating Market Density**
 
-To achieve this, you need different code chunks and connect them with %>%:
-
-**Join the spatial data:** Perform a spatial join between the Christmas markets dataset and the Berlin districts dataset, so that each Christmas market is matched with the district it falls within. The spatial join should use the st_intersects function, which checks whether each Christmas market point falls within a district's geometry. (**Use this code for your calculation:** st_join(christmas_markets_berlin, berlin_districts, join = st_intersects))
-
-[Remove geometry data:]{.underline} After the spatial join, drop the geometry information from the resulting dataset, as it is not needed for the summary. (**Use this code for your calculation:** st_drop_geometry())
-
-**Group by district:** Group the data by the name of each district (stored in the column Gemeinde_name.y) and count how many Christmas markets are located in each district. (**Use this code for your calculation:** group_by(Gemeinde_name.y))
-
-**Summarize the data:** Create a summary of the number of Christmas markets for each district. (**Use this code for your calculation:** summarise(Christmas_Markets = n()))
-
-**Clean district names:** Apply a cleaning function (clean_district_names) to standardize and clean up the district names for reporting purposes (e.g., removing special characters, fixing inconsistencies, etc.). (**Use this code for your calculation:** mutate(Gemeinde_name.y = clean_district_names(Gemeinde_name.y)))
+*In this code chunk, we merge the Christmas markets data with the population data to calculate the market density (number of markets per 1,000 residents) for each district. We then join this enriched data back to the spatial data of Berlin districts to prepare for visualization.*
 
 ```{r}
-# YOUR CODE HERE
+
+# Merge the markets and population data
+final_table <- markets_per_district %>%                           # Start with the markets per district data
+  left_join(population_data, by = c("Gemeinde_name.y" = "Bezirk")) %>%  # Join population data by matching district names
+  mutate(
+    Market_Density_per_1000_residents = (Christmas_Markets / Bevölkerung) * 1000  # Calculate markets per 1,000 residents
+  ) %>%
+  select(
+    District = Gemeinde_name.y,                  # Rename 'Gemeinde_name.y' to 'District'
+    Population = Bevölkerung,                    # Rename 'Bevölkerung' to 'Population'
+    Christmas_Markets,                           # Keep the 'Christmas_Markets' column
+    Market_Density_per_1000_residents            # Keep the calculated density
+  ) %>%
+  arrange(desc(Market_Density_per_1000_residents))  # Sort the data by market density in descending order
+
+# Join the density data back to the berlin_districts for visualization
+berlin_districts <- berlin_districts %>%
+  mutate(District = clean_district_names(Gemeinde_name)) %>%      # Clean and standardize district names
+  left_join(final_table, by = c("District" = "District"))         # Join the final table data by 'District' name
 
 ```
 
 <br>
 
-d) 
+c) **Calculating Distances to the Hertie School**
+
+*In this code chunk, we manually set the coordinates for the Hertie School and calculate the distances from the school to each Christmas market in Berlin. We then create a table of the five closest markets and identify them for further analysis or visualization.*
+
+Explanation of sf Package functions:
+
+**st_as_sf():** Converts a data frame or other object into an sf object, integrating spatial geometry with attribute data.
+
+**st_sfc()**: Creates a simple feature geometry list column, which can store multiple geometries (e.g., points, lines).
+
+**st_point()**: Constructs a POINT geometry from given coordinates.
+
+**st_distance()**: Calculates pairwise distances between geometries in two sf objects, returning a distance matrix.
 
 ```{r}
-# YOUR CODE HERE
+
+# Manually set coordinates for Hertie School (approximate coordinates for Friedrichstraße 180)
+hertie_coords <- c(13.388860, 52.520008)  # Longitude and Latitude for Hertie School
+
+# Create an sf point for Hertie School
+hertie_point <- st_as_sf(
+  data.frame(
+    name = "Hertie",                              # Assign the name "Hertie" to the point
+    geometry = st_sfc(st_point(hertie_coords)),   # Create a simple feature geometry column with the coordinates
+    stringsAsFactors = FALSE                      # Do not convert strings to factors
+  ),
+  crs = st_crs(berlin_districts)                  # Set the Coordinate Reference System to match berlin_districts
+)
+
+# Distance calculation between Hertie School and each Christmas market
+distances <- st_distance(hertie_point, christmas_markets_berlin) %>% as.numeric()
+# st_distance(): Computes pairwise distances between geometries in two sf objects
+
+# Create a table with distances and market information
+distance_table <- christmas_markets_berlin %>%
+  st_drop_geometry() %>%                           # Remove geometry column to simplify data frame
+  mutate(Distance_to_Hertie_m = distances) %>%     # Add distances to the data frame
+  arrange(Distance_to_Hertie_m) %>%                # Sort markets by distance to Hertie School
+  slice(1:5)                                       # Select the 5 closest markets
+# st_drop_geometry(): Removes the geometry column from an sf object, returning a data frame
+
+# Display the optimized distance table for readability
+optimized_distance_table <- distance_table %>%
+  select(Christmas_Market = title, Distance_to_Hertie_m)  # Select and rename columns for clarity
+
+# Mark the closest five Christmas markets with a distinct color
+closest_markets <- christmas_markets_berlin[which(christmas_markets_berlin$id %in% distance_table$id), ]
 
 ```
 
 <br>
 
-g) 
+d) **Plotting Berlin Districts with Market Density and Proximity to Hertie School**
+
+*In this code chunk, we generate a detailed map of Berlin districts, coloring them based on the density of Christmas markets per 1,000 residents. We plot all Christmas markets, highlight the ones closest to the Hertie School, mark the location of the Hertie School, and add labels for districts and the school.*
 
 ```{r}
-# YOUR CODE HERE
+# Plot the Berlin districts colored by market density and include points and names
+ggplot(data = berlin_districts) +
+  # Plot districts with fill based on market density
+  geom_sf(
+    aes(fill = Market_Density_per_1000_residents),  # Color fill based on market density
+    color = "white",        # District borders in white
+    size = 0.4,             # Border line width
+    alpha = 0.8             # Transparency of district fill
+  ) +
+  # geom_sf(): Plots spatial data from an sf object; handles geometries
 
-```
+  # Apply a green gradient scale for density
+  scale_fill_gradient(
+    low = "#9AE89E",        # Low end of gradient color
+    high = "#01402E",       # High end of gradient color
+    name = "Market Density\n(per 1,000 residents)"  # Legend title
+  ) +
 
-<br>
+  # Plot each Christmas market as a red point
+  geom_sf(
+    data = christmas_markets_berlin,                # Data for Christmas markets
+    aes(geometry = geometry),                       # Geometry mapping
+    color = "#D94854",                              # Point outline color
+    size = 2,                                       # Point size
+    shape = 21,                                     # Point shape allowing fill and color
+    fill = "#D94854"                                # Point fill color
+  ) +
 
-h) 
+  # Plot the closest Christmas markets as gold points
+  geom_sf(
+    data = closest_markets,                         # Data for closest markets
+    aes(geometry = geometry),                       # Geometry mapping
+    color = "gold",                                 # Point outline color
+    size = 3,                                       # Larger size to stand out
+    shape = 21,                                     # Shape allowing fill and color
+    fill = "gold"                                   # Point fill color
+  ) +
 
-```{r}
-# YOUR CODE HERE
+  # Plot the Hertie School point in yellow
+  geom_sf(
+    data = hertie_point,                            # Data for Hertie School location
+    aes(geometry = geometry),                       # Geometry mapping
+    color = "#F2D94A",                              # Point outline color
+    size = 3,                                       # Point size
+    shape = 23,                                     # Diamond shape
+    fill = "#F2D94A"                                # Point fill color
+  ) +
 
-```
+  # Add label for the Hertie School
+  geom_text(
+    data = hertie_point,                            # Data for labeling
+    aes(
+      x = st_coordinates(geometry)[1],              # X-coordinate of Hertie
+      y = st_coordinates(geometry)[2] + 0.001,      # Y-coordinate adjusted upward
+      label = name                                  # Label text
+    ),
+    size = 3,                                       # Text size
+    color = "white",                                # Text color
+    fontface = "bold"                               # Bold text
+  ) +
 
-<br>
+  # Add district names at centroids
+  geom_text(
+    data = berlin_districts_centroids,              # Data for district centroids
+    aes(
+      x = st_coordinates(geometry)[, 1],            # X-coordinates of centroids
+      y = st_coordinates(geometry)[, 2],            # Y-coordinates of centroids
+      label = split_name                            # District names
+    ),
+    size = 3,                                       # Text size
+    color = "white",                                # Text color
+    fontface = "bold",                              # Bold text
+    lineheight = 0.8                                # Adjust line spacing for wrapped text
+  ) +
 
-i) 
+  # Add title, subtitle, and caption to the plot
+  labs(
+    title = "Berlin Districts with Christmas Markets Density",        # Plot title
+    subtitle = "Number of Christmas Markets per 1,000 Residents",     # Plot subtitle
+    caption = "Data Source: Open Data Berlin & Wikipedia"             # Data source caption
+  ) +
 
-```{r}
-# YOUR CODE HERE
+  # Apply minimal theme and remove axis elements
+  theme_minimal() +
+  theme(
+    axis.title = element_blank(),                   # Remove axis titles
+    axis.text = element_blank(),                    # Remove axis text
+    axis.ticks = element_blank(),                   # Remove axis ticks
+    panel.grid = element_blank()                    # Remove background grid lines
+  )
 
 ```
 
 <br>
 
 ***
-
-
-### Task 2 - Scraping members of the European Parliament
-
-The European Parliament's website maintains a [full list of MEPs](https://www.europarl.europa.eu/meps/en/full-list/all). For this exercise, you will focus on scraping data from the HTML code, so please don't make use of the linked XML files.
-
-a) Extract a data frame (`meps_df`) with the variables listed below, print the first 3 observations, and check the number of rows.
-
-| Variable           | Data type  | Description |
-|------------------|:--------:|--------------|
-| `name`             | `<chr>` | Full name of MEP |
-| `ep_party_group`   | `<chr>` | EP party group |
-| `country`      | `<chr>` | Country of MEP |
-| `nat_party`| `<chr>` | National party of MEP |
-| `profile_url`| `<chr>` | URL linking to MEP profile |
-| `mep_id`| `<chr>` | MEP numeric identifier included as a path in `profile_url` |
-
-```{r}
-# YOUR CODE HERE
-
-```
-
-<br>
-
-b) Now, using the `profile_url` data in the table. Provide polite code that downloads the first 10 of the linked HTMLs to a local folder retaining the MEP IDs as file names. 
-
-+ Explain why your code follows best practice of polite scraping by implementing at least three practices (bullet points are sufficient). 
-+ Provide proof that the download was performed successfully by listing the file names and reporting the total number of files contained by the folder. 
-+ Make sure that the folder itself is not synced to GitHub using `.gitignore`.
-
-```{r}
-# YOUR CODE HERE
-
-```
-
-::: answer
-My code follows best practices of polite web scraping by implementing the following techniques:
-
-    Setting User Agent and Contact Information: By using httr::add_headers() to include a UserAgent and From header with your email address, you clearly identify yourself to the web server. This practice helps website administrators know who is accessing their site and allows them to contact you if there are any issues with your requests.
-
-    Respecting Server Load with Sys.sleep(): By adding a Sys.sleep() call with a random interval between requests, you reduce the impact on the server by not bombarding it with continuous, rapid requests. This practice prevents overloading the server and helps avoid getting your IP blocked.
-
-    Limiting the Number of Requests: By specifically limiting the number of requests to the first 10 URLs, you ensure that you are not overwhelming the server with a large volume of requests in a short period of time. This conservative approach respects the server's capacity and reduces the risk of being flagged as abusive.
-
-These practices help ensure that my web scraping activities are respectful to the website's resources and in compliance with ethical guidelines.
-:::
-
-<br>
-
-***
-
-
-### Task 3 - Eat my shorts
-
-Write an R function `get_simpsons_quote()` that wraps around the Simpsons Quote API at https://thesimpsonsquoteapi.glitch.me/quotes. This function should accept parameters for `character` (Name of a character) and `count` (Number of quotes to be retrieved), fetch the data, and return it as a `data.frame`. 
-
-The function should also return a meaningful message that, e.g., reports the number of quotes fetched as well as the first fetched quote and its author if possible. Show that it works with an example prompt.
-
-
-```{r}
-# YOUR CODE HERE
-
-```
-
-
