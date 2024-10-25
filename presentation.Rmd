@@ -6,8 +6,6 @@ institute: "Hertie School" #"`r format(Sys.time(), '%d %B %Y')`"
 output:
   xaringan::moon_reader:
     includes:
-      after_body: "../add_hertie_logo.html"
-      in_header: "../my_header.html"
     css: [default,'../simons-touch.css', metropolis, metropolis-fonts] 
     lib_dir: libs
     nature:
@@ -72,13 +70,34 @@ library(kableExtra)
 class: inverse, center, middle
 name: whyviz
 
+---
+#It's (almost) Christmas time!
+ 
+Where can we go for Christmas markets?
 
+---
+#A list of all Berlin Christmas markets
+
+
+
+---
+#We created a map with all Berlin Christmas markets with the sf-package
+
+
+
+---
+#Basic Features of the sf-package
+
+
+---
+#Application
 
 
 ---
 # End slide
 
-
+---
+# End
 
 
 
