@@ -1,0 +1,172 @@
+---
+title: "Workshop_sf-geospatial_analysis"
+author: "Nadine Daum, Oliver Pollex, Yun-Te Sung"
+date: "`r format(Sys.time(), '%B %d, %Y | %H:%M:%S | %Z')`"
+output:
+  html_document:
+    code_folding: show
+    df_print: paged
+    highlight: tango
+    number_sections: no
+    theme: cosmo
+    toc: no
+---
+
+<style>
+div.answer {background-color:#f3f0ff; border-radius: 5px; padding: 20px;}
+
+div.comment {background-color:#F0F6FF; border-radius: 5px; padding: 20px;}
+</style>
+
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      error = FALSE,
+                      message = FALSE,
+                      warning = FALSE,
+                      comment = NA)
+
+"#f3f0ff"
+```
+
+<!-- Do not forget to input your Github username in the YAML configuration up there --> 
+
+***
+
+```{r, include = T}
+# LOAD THE PACKAGES YOU ARE USING IN THIS CODE CHUNK
+library(sf)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(rvest)
+```
+
+<br>
+
+***
+
+### Task 1 - Regular expressions and XPath with Friends
+
+
+a) Load nessecary data
+
+
+```{r}
+
+districts_file <- "bezirksgrenzen.geojson"  # Berlin districts GeoJSON path
+christmas_markets_url <- "https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q="  # URL to the Christmas markets GeoJSON
+population_url <- "https://de.wikipedia.org/wiki/Bevölkerung_von_Berlin"  # Wikipedia page with population data
+
+# Function to clean and standardize district names
+clean_district_names <- function(name) {
+  name %>%
+    str_replace_all("-", " ") %>%  # Replace dashes with spaces
+    str_replace_all("[^\\w\\säöüÄÖÜß]", "") %>%  # Remove any non-alphanumeric and non-German characters
+    str_squish() %>%  # Remove extra whitespace
+    str_to_title()  # Convert to title case
+}
+
+# Read Berlin districts GeoJSON file
+berlin_districts <- st_read(districts_file) %>%
+  mutate(Gemeinde_name = clean_district_names(Gemeinde_name))
+
+```
+
+<br>
+
+b) Read the Christmas markets GeoJSON directly from the URL (christmas_markets_url) with the function st_read(URL) and store them in a variable called christmas_markets.
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+c) # Ensure the coordinate systems are the same
+st_crs(christmas_markets) <- st_crs(berlin_districts)
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+d) 
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+***
+
+
+### Task 2 - Scraping members of the European Parliament
+
+The European Parliament's website maintains a [full list of MEPs](https://www.europarl.europa.eu/meps/en/full-list/all). For this exercise, you will focus on scraping data from the HTML code, so please don't make use of the linked XML files.
+
+a) Extract a data frame (`meps_df`) with the variables listed below, print the first 3 observations, and check the number of rows.
+
+| Variable           | Data type  | Description |
+|------------------|:--------:|--------------|
+| `name`             | `<chr>` | Full name of MEP |
+| `ep_party_group`   | `<chr>` | EP party group |
+| `country`      | `<chr>` | Country of MEP |
+| `nat_party`| `<chr>` | National party of MEP |
+| `profile_url`| `<chr>` | URL linking to MEP profile |
+| `mep_id`| `<chr>` | MEP numeric identifier included as a path in `profile_url` |
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+b) Now, using the `profile_url` data in the table. Provide polite code that downloads the first 10 of the linked HTMLs to a local folder retaining the MEP IDs as file names. 
+
++ Explain why your code follows best practice of polite scraping by implementing at least three practices (bullet points are sufficient). 
++ Provide proof that the download was performed successfully by listing the file names and reporting the total number of files contained by the folder. 
++ Make sure that the folder itself is not synced to GitHub using `.gitignore`.
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+::: answer
+My code follows best practices of polite web scraping by implementing the following techniques:
+
+    Setting User Agent and Contact Information: By using httr::add_headers() to include a UserAgent and From header with your email address, you clearly identify yourself to the web server. This practice helps website administrators know who is accessing their site and allows them to contact you if there are any issues with your requests.
+
+    Respecting Server Load with Sys.sleep(): By adding a Sys.sleep() call with a random interval between requests, you reduce the impact on the server by not bombarding it with continuous, rapid requests. This practice prevents overloading the server and helps avoid getting your IP blocked.
+
+    Limiting the Number of Requests: By specifically limiting the number of requests to the first 10 URLs, you ensure that you are not overwhelming the server with a large volume of requests in a short period of time. This conservative approach respects the server's capacity and reduces the risk of being flagged as abusive.
+
+These practices help ensure that my web scraping activities are respectful to the website's resources and in compliance with ethical guidelines.
+:::
+
+<br>
+
+***
+
+
+### Task 3 - Eat my shorts
+
+Write an R function `get_simpsons_quote()` that wraps around the Simpsons Quote API at https://thesimpsonsquoteapi.glitch.me/quotes. This function should accept parameters for `character` (Name of a character) and `count` (Number of quotes to be retrieved), fetch the data, and return it as a `data.frame`. 
+
+The function should also return a meaningful message that, e.g., reports the number of quotes fetched as well as the first fetched quote and its author if possible. Show that it works with an example prompt.
+
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+
