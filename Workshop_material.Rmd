@@ -1,6 +1,6 @@
 ---
-title: "Assignment 3 - Web data"
-author: "Oliver H. P. Pollex"
+title: "Workshop_sf-geospatial_analysis"
+author: "Nadine Daum, Oliver Pollex, Yun-Te Sung"
 date: "`r format(Sys.time(), '%B %d, %Y | %H:%M:%S | %Z')`"
 output:
   html_document:
@@ -36,13 +36,11 @@ knitr::opts_chunk$set(echo = TRUE,
 
 ```{r, include = T}
 # LOAD THE PACKAGES YOU ARE USING IN THIS CODE CHUNK
-library(xml2)
-library(rvest)
-library(knitr)
-library(ggplot2)
+library(sf)
 library(dplyr)
+library(ggplot2)
 library(stringr)
-library(polite)
+library(rvest)
 ```
 
 <br>
@@ -51,76 +49,56 @@ library(polite)
 
 ### Task 1 - Regular expressions and XPath with Friends
 
-Choose **one of the following** tasks (a) or (b) to complete:
 
-a) Extract information about the first six UN Secretary Generals from a messy string using regular expressions and store the data in a data frame (`unsg_df`). The resulting data frame should be formatted with the following columns and data types:
+a) Load nessecary data
 
-
-| Variable           | Data type  |
-|------------------|:--------:|
-| `name`             | `<chr>` |
-| `assumed_office`   | `<date>` |
-| `left_office`      | `<date>` |
-| `country_of_origin`| `<chr>` |
-| `un_regional_group`| `<chr>` |
-
-Render the data frame as HTML table.
 
 ```{r}
-# YOUR CODE HERE
+
+districts_file <- "bezirksgrenzen.geojson"  # Berlin districts GeoJSON path
+christmas_markets_url <- "https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q="  # URL to the Christmas markets GeoJSON
+population_url <- "https://de.wikipedia.org/wiki/Bevölkerung_von_Berlin"  # Wikipedia page with population data
+
+# Function to clean and standardize district names
+clean_district_names <- function(name) {
+  name %>%
+    str_replace_all("-", " ") %>%  # Replace dashes with spaces
+    str_replace_all("[^\\w\\säöüÄÖÜß]", "") %>%  # Remove any non-alphanumeric and non-German characters
+    str_squish() %>%  # Remove extra whitespace
+    str_to_title()  # Convert to title case
+}
+
+# Read Berlin districts GeoJSON file
+berlin_districts <- st_read(districts_file) %>%
+  mutate(Gemeinde_name = clean_district_names(Gemeinde_name))
+
 ```
 
 <br>
 
-b) The file `friends_info.xml` contains information about all episodes from the TV series Friends (accessible at https://raw.githubusercontent.com/intro-to-data-science-24/labs/main/data/friends_info.xml). Import the file using the `xml2::read_xml()` function. <i>(Hint: this is an XML document, so you will need to use the xml analogues of `rvest::read_html()`, `rvest::html_nodes()`, and `rvest::html_text()`)</i>.
-
-+ Use XPath expressions to extract the season, episode number, and title of all episodes. Store this information in a data frame (`episode_df`) and render the first 5 rows as an HTML table.
-+ Use XPath expressions to return the vector `directed_by_ross` providing the titles of all episodes directed by Ross himself (**David Schwimmer**).
-+ Create a chart that reports the frequency of episodes mentioning one of the six main characters (Ross, Rachel, Monica, Chandler, Joey, Phoebe) in the title.
+b) Read the Christmas markets GeoJSON directly from the URL (christmas_markets_url) with the function st_read(URL) and store them in a variable called christmas_markets.
 
 ```{r}
 # YOUR CODE HERE
 
-parsed_url = xml2::read_xml("https://raw.githubusercontent.com/intro-to-data-science-24/labs/main/data/friends_info.xml", encoding = "utf-8")
+```
 
-seasons <- xml_find_all(parsed_url, "//season") %>% xml_text()
-episode_numbers <- xml_find_all(parsed_url, "//episode_number") %>% xml_text()
-titles <- xml_find_all(parsed_url, "//title") %>% xml_text()
+<br>
 
-episode_df <- data.frame(
-  Season = seasons,
-  Episode_Number = episode_numbers,
-  Title = titles,
-  stringsAsFactors = FALSE
-)
+c) # Ensure the coordinate systems are the same
+st_crs(christmas_markets) <- st_crs(berlin_districts)
 
-#used chatGPT to find the kable function to create html tables.
-knitr::kable(head(episode_df,5), format = "html", table.attr = 'class="dataframe" border="1"')
+```{r}
+# YOUR CODE HERE
 
-directed_by_ross <- xml_find_all(parsed_url, "//episode[directed_by='David Schwimmer']/title") %>% xml_text()
-directed_by_ross
+```
 
-# Define the main characters
-characters <- c("Ross", "Rachel", "Monica", "Chandler", "Joey", "Phoebe")
+<br>
 
-# Calculate the frequency of each character in episode titles
-character_counts <- sapply(characters, function(char) {
-  sum(grepl(char, episode_df$Title, ignore.case = TRUE))
-})
+d) 
 
-# Convert the counts into a data frame for plotting
-character_counts_df <- data.frame(
-  Character = characters,
-  Frequency = character_counts
-)
-
-# Create the bar chart
-ggplot(character_counts_df, aes(x = Character, y = Frequency)) +
-  geom_bar(stat = "identity") +
-  labs(title = "Frequency of Main Characters Mentioned in Episode Titles",
-       x = "Character",
-       y = "Frequency") +
-  theme_minimal()
+```{r}
+# YOUR CODE HERE
 
 ```
 
@@ -146,59 +124,7 @@ a) Extract a data frame (`meps_df`) with the variables listed below, print the f
 
 ```{r}
 # YOUR CODE HERE
-EU_url = rvest::read_html("https://www.europarl.europa.eu/meps/en/full-list/all", encoding = "utf-8")
 
-# Initialize vectors to store MEP information
-names <- c()
-ep_party_groups <- c()
-countries <- c()
-national_parties <- c()
-profile_urls <- c()
-mep_ids <- c()
-
-# Loop through each MEP block to extract data
-mep_blocks <- EU_url %>% html_elements(".erpl_member-list-item")
-
-for (mep in mep_blocks) {
-  # Extract MEP name
-  name <- mep %>% html_element(".erpl_title-h4") %>% html_text(trim = TRUE)
-  names <- c(names, name)
-  
-  # Extract EP party group
-  ep_party_group <- mep %>% html_element(".sln-additional-info:nth-child(1)") %>% html_text(trim = TRUE)
-  ep_party_groups <- c(ep_party_groups, ep_party_group)
-  
-  # Extract country if present, otherwise assign NA
-  country_element <- mep %>% html_elements(".sln-additional-info")
-  country <- if (length(country_element) >= 2) html_text(country_element[2], trim = TRUE) else NA
-  countries <- c(countries, country)
-    
-  # Extract national party if present, otherwise assign NA
-  nat_party_element <- mep %>% html_elements(".sln-additional-info")
-  nat_party <- if (length(nat_party_element) >= 3) html_text(nat_party_element[3], trim = TRUE) else NA
-  national_parties <- c(national_parties, nat_party)
-  
-  # Extract profile URL and MEP ID
-  profile_url <- mep %>% html_element("a[itemprop='url']") %>% html_attr("href")
-  profile_urls <- c(profile_urls, profile_url)
-  mep_id <- str_extract(profile_url, "[0-9]+$")
-  mep_ids <- c(mep_ids, mep_id)
-}
-
-# Create the data frame
-meps_df <- data.frame(
-  name = as.character(names),
-  ep_party_group = as.character(ep_party_groups),
-  country = as.character(countries),
-  nat_party = as.character(national_parties),
-  profile_url = as.character(profile_urls),
-  mep_id = as.character(mep_ids),
-  stringsAsFactors = FALSE
-)
-
-# Print the data frame
-head(meps_df, 3)
-nrow(meps_df)
 ```
 
 <br>
@@ -211,51 +137,7 @@ b) Now, using the `profile_url` data in the table. Provide polite code that down
 
 ```{r}
 # YOUR CODE HERE
-url = "https://www.europarl.europa.eu"
-rvest_session <- rvest::session(url, 
-                                httr::add_headers(
-                                  `From` = "o.pollex@students.hertie-school.org", 
-                                  `UserAgent` = R.Version()$version.string
-                                  )
-                                )
 
-if (!dir.exists("mep_profiles")) {
-  dir.create("mep_profiles")
-}
-
-exp_profile_url = meps_df$profile_url[c(1:10)]
-exp_meps_id = meps_df$mep_id[c(1:10)]
-
-# Download the first 10 URLs using download.file()
-for (i in 1:10) {
-  # Define the local file path
-  html_file_path <- paste0("mep_profiles/", mep_ids[i], ".html")
-  
-  # Use download.file to download the HTML file
-  tryCatch({
-    download.file(profile_urls[i], destfile = html_file_path, quiet = TRUE)
-    cat("Downloaded:", html_file_path, "\n")
-  }, error = function(e) {
-    # Print a message if an error occurs
-    cat("Error downloading:", profile_urls[i], "-", conditionMessage(e), "\n")
-  })
-  Sys.sleep(runif(1, 1, 2))
-}
-
-directory_path <- "mep_profiles"
-
-# Check if the directory exists and list the files
-if (dir.exists(directory_path)) {
-  file_list <- list.files(directory_path)  # List of files in the directory
-  total_files <- length(file_list)  # Total number of files in the directory
-
-  # Display the file names and the total count
-  cat("Files in the directory:\n")
-  print(file_list)
-  cat("\nTotal number of files:", total_files, "\n")
-} else {
-  cat("The directory", directory_path, "does not exist.\n")
-}
 ```
 
 ::: answer
@@ -284,26 +166,6 @@ The function should also return a meaningful message that, e.g., reports the num
 
 ```{r}
 # YOUR CODE HERE
-browseURL("https://thesimpsonsquoteapi.glitch.me/")
-httr::GET("https://thesimpsonsquoteapi.glitch.me/quotes") |>
-    httr::http_type()
-
-get_simpsons_quote = function(character = "Homer Simpson", count = 1){
-  baseurl <- "https://thesimpsonsquoteapi.glitch.me/"
-  query <- "quotes"
-
-  encoded_character <- URLencode(character)
-  quotes = httr::GET(paste0(baseurl, query, "?count=", as.character(count), "&character=", encoded_character)) |> # Make API call
-    httr::content(as = 'text') |> # extract content as text
-    jsonlite::fromJSON() |> # convert JSON data into R object (nested list)
-    as.data.frame()
-  
-  print(paste0("The function retreived ", nrow(quotes), " quotes from the API."))
-  print(paste0("The first quote is: '", quotes$quote[1], "' and was said by: ", quotes$character[1], "."))
-  return (quotes)
-}
-
-exp_1 = get_simpsons_quote(character = "Homer Simpson", count = 5)
 
 ```
 
