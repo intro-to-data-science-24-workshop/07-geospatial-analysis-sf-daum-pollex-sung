@@ -47,19 +47,16 @@ library(rvest)
 
 ***
 
-### Task 1 - Regular expressions and XPath with Friends
+## Task build a map of christmas markets in berlin
 
 
-a) Load nessecary data
-
-
-```{r}
+a) Load nessecary data. **Use this code for your calculation:**
 
 districts_file <- "bezirksgrenzen.geojson"  # Berlin districts GeoJSON path
 christmas_markets_url <- "https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q="  # URL to the Christmas markets GeoJSON
 population_url <- "https://de.wikipedia.org/wiki/Bevölkerung_von_Berlin"  # Wikipedia page with population data
 
-# Function to clean and standardize district names
+### Function to clean and standardize district names
 clean_district_names <- function(name) {
   name %>%
     str_replace_all("-", " ") %>%  # Replace dashes with spaces
@@ -68,15 +65,9 @@ clean_district_names <- function(name) {
     str_to_title()  # Convert to title case
 }
 
-# Read Berlin districts GeoJSON file
+### Read Berlin districts GeoJSON file
 berlin_districts <- st_read(districts_file) %>%
   mutate(Gemeinde_name = clean_district_names(Gemeinde_name))
-
-```
-
-<br>
-
-b) Read the Christmas markets GeoJSON directly from the URL (christmas_markets_url) with the function st_read(URL) and store them in a variable called christmas_markets.
 
 ```{r}
 # YOUR CODE HERE
@@ -85,8 +76,61 @@ b) Read the Christmas markets GeoJSON directly from the URL (christmas_markets_u
 
 <br>
 
-c) # Ensure the coordinate systems are the same
-st_crs(christmas_markets) <- st_crs(berlin_districts)
+b) Read the Christmas markets GeoJSON directly from the URL (christmas_markets_url) with the function st_read(URL) and store them in a variable called christmas_markets.
+*(For documentation on the function, type: ?st_read)*
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+c) Ensure the coordinate systems are the same (**Use this code for your calculation:** st_crs(christmas_markets) <- st_crs(berlin_districts))
+*(For documentation on the function, type: ?st_crs)*
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+d) We only want to include Christmas markets within Berlin in our map. Therefore check which christmas_markets are in the berlin_districts. Use the function st_intersection(x, y, ...) to keep intersecting Christmas markets and store them in the variable christmas_markets_berlin.
+*(For documentation on the function, type: ?st_intersection)*
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+e) Let's calculate the centroids of the Berlin districts to position the names. (**Use this code for your calculation:** 
+berlin_districts_centroids <- st_centroid(berlin_districts) %>%
+  mutate(
+    split_name = str_wrap(Gemeinde_name, width = 10))  # Wrap names into lines of 10 characters)
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+f) At this point, you have a dataset containing the locations of Christmas markets in Berlin (christmas_markets_berlin) and another dataset with the geographical boundaries and names of Berlin districts (berlin_districts). The goal here is to determine how many Christmas markets are located in each district of Berlin, and to provide a clean list of districts with the corresponding number of markets.
+
+To achieve this, you need different code chunks and connect them with %>%:
+
+**Join the spatial data:** Perform a spatial join between the Christmas markets dataset and the Berlin districts dataset, so that each Christmas market is matched with the district it falls within. The spatial join should use the st_intersects function, which checks whether each Christmas market point falls within a district's geometry. (**Use this code for your calculation:** st_join(christmas_markets_berlin, berlin_districts, join = st_intersects))
+
+[Remove geometry data:]{.underline} After the spatial join, drop the geometry information from the resulting dataset, as it is not needed for the summary. (**Use this code for your calculation:** st_drop_geometry())
+
+**Group by district:** Group the data by the name of each district (stored in the column Gemeinde_name.y) and count how many Christmas markets are located in each district. (**Use this code for your calculation:** group_by(Gemeinde_name.y))
+
+**Summarize the data:** Create a summary of the number of Christmas markets for each district. (**Use this code for your calculation:** summarise(Christmas_Markets = n()))
+
+**Clean district names:** Apply a cleaning function (clean_district_names) to standardize and clean up the district names for reporting purposes (e.g., removing special characters, fixing inconsistencies, etc.). (**Use this code for your calculation:** mutate(Gemeinde_name.y = clean_district_names(Gemeinde_name.y)))
 
 ```{r}
 # YOUR CODE HERE
@@ -96,6 +140,33 @@ st_crs(christmas_markets) <- st_crs(berlin_districts)
 <br>
 
 d) 
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+g) 
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+h) 
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+<br>
+
+i) 
 
 ```{r}
 # YOUR CODE HERE

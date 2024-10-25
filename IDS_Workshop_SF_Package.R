@@ -6,7 +6,7 @@ library(stringr)
 library(rvest)
 
 # File paths and URLs
-districts_file <- "bezirksgrenzen.geojson"  # Berlin districts GeoJSON path
+districts_file <- "data/bezirksgrenzen.geojson"  # Berlin districts GeoJSON path
 christmas_markets_url <- "https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q="  # URL to the Christmas markets GeoJSON
 population_url <- "https://de.wikipedia.org/wiki/Bevölkerung_von_Berlin"  # Wikipedia page with population data
 
