@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Geospatial Analysis with SF</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Nadine Daum, Oliver Pollex, Yun-Te Sung" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../simons-touch.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Geospatial Analysis with SF
+]
+.subtitle[
+## Mapping Berlin’s Christmas Markets
+]
+.author[
+### Nadine Daum, Oliver Pollex, Yun-Te Sung
+]
+.institute[
+### Hertie School
+]
+
+---
+
+
+
+&lt;style type="text/css"&gt;
+@media print { # print out incremental slides; see https://stackoverflow.com/questions/56373198/get-xaringan-incremental-animations-to-print-to-pdf/56374619#56374619
+  .has-continuation {
+    display: block !important;
+  }
+}
+&lt;/style&gt;
+
+
+
+
+# Table of contents
+
+&lt;br&gt;
+
+1. [What is Geospatial Analysis?](#intro)
+
+2. [The Simple Features (sf) Package](#method)
+
+3. [Application: Berlin's Christmas Markets](#casestudy)
+
+4. [Further Resources](#links)
+
+
+
+&lt;!-- ############################################ --&gt;
+---
+class: inverse, center, middle
+name: intro
+
+# What is Geospatial Analysis?
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px style="width:1000px; margin:auto;"/&gt;&lt;/html&gt;
+
+---
+
+# Hook
+
+### Scenario
+You want to go to Christmas Markets.// 
+
+Which ones are closest to Hertie? If you want to visit as many as possible in a day where should you go? 
+
+---
+# Hook (cont.)
+
+.pull-left[
+&amp;lt;div align="center"&amp;gt;
+&amp;lt;br&amp;gt;
+&amp;lt;img src="images/cm_list" width=400&amp;gt;
+&amp;lt;/div&amp;gt;
+]
+
+
+
+---
+
+class: inverse, center, middle
+name: method
+
+# The Simple Features (sf) Package
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px style="width:1000px; margin:auto;"/&gt;&lt;/html&gt;
+
+---
+
+
+
+
+
+---
+class: inverse, center, middle
+name: casestudy
+
+# Application: Berlin's Christmas Markets
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px style="width:1000px; margin:auto;"/&gt;&lt;/html&gt;
+
+
+---
+
+# Mapping Berlin's Christmas Markets
+
+###sf Package in essence
+To represent the geographic placement of an object you need two pieces of information: the coordinates of the object and a system of reference for how the coordinates relate to a physical location on Earth.&lt;sup&gt;1&lt;/sup&gt;
+
+.footnote[&lt;sup&gt;1&lt;/sup&gt;This explanation is borrowed from [Jesse Sadler](https://www.jessesadler.com/post/gis-with-r-intro/)]
+
+
+###Steps Breakdown
+1. Set up the system of reference (the map of Berlin)
+2. Obtain the coordinates of the objects of interest (Christmas Markets)
+3. Plot the objects onto the system of reference
+
+---
+# Mapping Berlin's Christmas Markets
+
+.pull-left[
+### Step 1: Set up the system of reference
+
+``` r
+R&gt; library(sf)
+R&gt; 
+R&gt; districts_file &lt;-"/Users/yunteee/Documents/GitHub/07-geospatial-analysis-sf-daum-pollex-sung/data/bezirksgrenzen.geojson"
+*R&gt; berlin_districts &lt;- st_read(districts_file)
+```
+
+```
+   Reading layer `bezirksgrenzen' from data source 
+     `/Users/yunteee/Documents/GitHub/07-geospatial-analysis-sf-daum-pollex-sung/data/bezirksgrenzen.geojson' 
+     using driver `GeoJSON'
+   Simple feature collection with 12 features and 6 fields
+   Geometry type: MULTIPOLYGON
+   Dimension:     XY
+   Bounding box:  xmin: 13.08835 ymin: 52.33825 xmax: 13.76116 ymax: 52.67551
+   Geodetic CRS:  WGS 84
+```
+]
+
+
+---
+# Mapping Berlin's Christmas Markets
+
+
+.pull-left[
+###Step 1: Set up the system of reference
+
+``` r
+R&gt; berlin_districts %&gt;%
++   select(Gemeinde_name, geometry)
+```
+
+```
+   Simple feature collection with 12 features and 1 field
+   Geometry type: MULTIPOLYGON
+   Dimension:     XY
+   Bounding box:  xmin: 13.08835 ymin: 52.33825 xmax: 13.76116 ymax: 52.67551
+   Geodetic CRS:  WGS 84
+   First 10 features:
+                   Gemeinde_name                       geometry
+   1               Reinickendorf MULTIPOLYGON (((13.32074 52...
+   2  Charlottenburg-Wilmersdorf MULTIPOLYGON (((13.32111 52...
+   3            Treptow-Köpenick MULTIPOLYGON (((13.57925 52...
+   4                      Pankow MULTIPOLYGON (((13.50481 52...
+   5                    Neukölln MULTIPOLYGON (((13.45832 52...
+   6                 Lichtenberg MULTIPOLYGON (((13.52316 52...
+   7         Marzahn-Hellersdorf MULTIPOLYGON (((13.61317 52...
+   8                     Spandau MULTIPOLYGON (((13.23119 52...
+   9         Steglitz-Zehlendorf MULTIPOLYGON (((13.31952 52...
+   10                      Mitte MULTIPOLYGON (((13.37721 52...
+```
+]
+
+---
+# Mapping Berlin's Christmas Markets
+
+###Step 1: Set up the system of reference
+
+.pull-left[
+
+``` r
+R&gt; ggplot()+
+*+   geom_sf(data=berlin_districts) +
++   theme_minimal()
+```
+]
+.pull-right[
+![](presentation_files/figure-html/mpg-layers-2-1.png)
+]
+---
+# Mapping Berlin's Christmas Markets
+
+###Step 2: Finding the coordinates of the objects
+
+``` r
+R&gt; christmas_markets_url &lt;- "https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q="
+R&gt; 
+R&gt; christmas_markets &lt;- st_read(christmas_markets_url)
+```
+
+```
+   Reading layer `OGRGeoJSON' from data source 
+     `https://www.berlin.de/sen/web/service/maerkte-feste/weihnachtsmaerkte/index.php/index/all.geojson?q=' 
+     using driver `GeoJSON'
+   Simple feature collection with 63 features and 5 fields
+   Geometry type: POINT
+   Dimension:     XY
+   Bounding box:  xmin: 12.5762 ymin: 52.0443 xmax: 14.6481 ymax: 53.3132
+   Geodetic CRS:  WGS 84
+```
+
+``` r
+R&gt; christmas_markets %&gt;%
++   select(title, geometry)
+```
+
+```
+   Simple feature collection with 63 features and 1 field
+   Geometry type: POINT
+   Dimension:     XY
+   Bounding box:  xmin: 12.5762 ymin: 52.0443 xmax: 14.6481 ymax: 53.3132
+   Geodetic CRS:  WGS 84
+   First 10 features:
+      title                geometry
+   1    183 POINT (13.4086 52.5191)
+   2     60 POINT (13.6002 52.4152)
+   3     63  POINT (13.2327 52.437)
+   4     66  POINT (13.2327 52.437)
+   5    102 POINT (13.4175 52.5366)
+   6    105 POINT (13.4175 52.5366)
+   7    108 POINT (13.4175 52.5366)
+   8    111 POINT (13.4175 52.5366)
+   9     99 POINT (13.3398 52.5261)
+   10    84 POINT (13.1955 52.5705)
+```
+
+---
+
+
+---
+# Further Resources
+
+###For an overview and deep dive into the backend of the packages: 
+- [sf Vignettes](https://r-spatial.github.io/sf/articles/)
+- [Chapter 2 Geographic data in R of Geocomputation with R by Robin Lovelace, Jakub Nowosad and Jannes Muenchow](https://r.geocompx.org/spatial-class.html#sf-classes)
+
+###Cheat sheet of functions
+- https://github.com/rstudio/cheatsheets/blob/main/sf.pdf
+
+###Case studies with step by step walkthroughs 
+- [Simple Features Tutorial in R by Rob Wiederstein](https://www.robwiederstein.org/2022/03/28/simple-features-tutorial-in-r-number-2/)
+- [Introduction to GIS with R by Jesse Sadler](https://www.jessesadler.com/post/gis-with-r-intro/)
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"hash": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
